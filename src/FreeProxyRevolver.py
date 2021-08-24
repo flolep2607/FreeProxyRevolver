@@ -34,7 +34,7 @@ class Revolver:
         self.current_proxy = next(self.proxies)
 
     def make_request(self, method: str, *args, use_fake_ua=False, **kwargs):
-        for rotation in range(self.max_rotates):
+        for rotation in range(self.max_rotates+1):
             kwargs["proxies"] = {"http": self.current_proxy.address,
                                  "https": self.current_proxy.address}
 
