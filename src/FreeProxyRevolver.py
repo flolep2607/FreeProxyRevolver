@@ -7,7 +7,7 @@ from fake_useragent import UserAgent
 ua = UserAgent()
 
 
-def scrape_loop():
+def scrape_loop(*args, **kwargs):
     while True:
         pq = FreeProxyScraper.ProxyQuery()
         for proxy in pq.find_proxies():
@@ -15,7 +15,7 @@ def scrape_loop():
 
 
 class Revolver:
-    def __init__(self, rotate_on_code=None, rotate_not_on_code=None, max_rotates=6):
+    def __init__(self, rotate_on_code=None, rotate_not_on_code=None, max_rotates=6, **kwargs):
         assert max_rotates >= 0, "Rotations must be 0 or a positive integer"
 
         if rotate_not_on_code is None:
@@ -26,15 +26,16 @@ class Revolver:
 
         self.rotate_not_on_code = rotate_not_on_code
         self.rotate_on_code = rotate_on_code
-        self.max_rotates = 5
-        self.proxies = scrape_loop()
+        self.max_rotates = max_rotates
+        self.min_anon_level = min_anon_level
+        self.proxies = scrape_loop(**kwargs)
         self.current_proxy = next(self.proxies)
 
     def rotate_proxy(self):
         self.current_proxy = next(self.proxies)
 
     def make_request(self, method: str, *args, use_fake_ua=False, **kwargs):
-        for rotation in range(self.max_rotates+1):
+        for rotation in range(self.max_rotates):
             kwargs["proxies"] = {"http": self.current_proxy.address,
                                  "https": self.current_proxy.address}
 

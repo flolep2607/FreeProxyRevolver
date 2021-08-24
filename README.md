@@ -26,3 +26,4 @@ parameter         | purpose
 rotate_on_code    | A list of http response codes that should trigger a rotation of which proxy is used. Default: `[429, 403]`
 rotate_not_on_code| A list of http response codes that should trigger a rotation of which proxy is used if the returned code is **not** on the list. Default: `[429, 403]`
 max_rotates       | The maximum proxy rotations that should be tried before giving up on rotating proxies and just returning whatever was retrieved, regardless of response code. Default: `6`
+min_anon_level    | Specifies the minimum anonymous level proxies used must meet. Level 0: transparent (server knows your ip), Level 1: Anonymous (server know you're using a proxy, but doesn't know your real ip.), Level 2: HIA/Elite (Server doesn't know your true ip or know that you are using a proxy)
