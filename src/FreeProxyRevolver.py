@@ -1,0 +1,74 @@
+from requests import request
+import FreeProxyScraper
+from typing import Callable
+
+
+def scrape_loop():
+    while True:
+        pq = FreeProxyScraper.ProxyQuery()
+        for proxy in pq.find_proxies():
+            yield proxy
+
+
+class Revolver:
+    def __init__(self, rotate_on_code=None, rotate_not_on_code=None, max_rotates=6):
+        assert max_rotates >= 0, "Rotations must be 0 or a positive integer"
+
+        if rotate_not_on_code is None:
+            rotate_not_on_code = []
+
+        if rotate_on_code is None:
+            rotate_on_code = [429, 403]
+
+        self.rotate_not_on_code = rotate_not_on_code
+        self.rotate_on_code = rotate_on_code
+        self.max_rotates = 5
+        self.proxies = scrape_loop()
+        self.current_proxy = next(self.proxies)
+
+    def rotate_proxy(self):
+        print("rotating")
+        self.current_proxy = next(self.proxies)
+
+    def make_request(self, method: str, *args, **kwargs):
+        for rotation in range(self.max_rotates):
+            kwargs["proxies"] = {"http": self.current_proxy.address,
+                                 "https": self.current_proxy.address}
+
+            try:
+                response = request(method, *args, **kwargs)
+            except Exception:
+                self.rotate_proxy()
+                continue
+
+            if response.status_code in self.rotate_on_code:
+                self.rotate_proxy()
+                continue
+
+            if len(self.rotate_not_on_code) > 0 and response.status_code not in self.rotate_not_on_code:
+                self.rotate_proxy()
+                continue
+
+            return response
+        return response
+
+    def get(self, *args, **kwargs):
+        return self.make_request("get", *args, **kwargs)
+
+    def head(self, *args, **kwargs):
+        return self.make_request("head", *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self.make_request("post", *args, **kwargs)
+
+    def patch(self, *args, **kwargs):
+        return self.make_request("patch", *args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        return self.make_request("put", *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return self.make_request("delete", *args, **kwargs)
+
+    def options(self, *args, **kwargs):
+        return self.make_request("options", *args, **kwargs)

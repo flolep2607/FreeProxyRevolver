@@ -20,15 +20,15 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
-        "requests",
-        "fake-useragent"
+        "requests[socks]",
+        "FreeProxyScraper"
     ],
     extras_require={
         "dev": [
             "pytest"
         ]
     },
-    url="https://github.com/Themis3000/changeme",
+    url="https://github.com/Themis3000/FreeProxyRevolver",
     author="Themi Megas",
     author_email="tcm4760@gmail.com"
 )
