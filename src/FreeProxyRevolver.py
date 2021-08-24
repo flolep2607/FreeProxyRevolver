@@ -1,6 +1,10 @@
 from requests import request
 import FreeProxyScraper
 from typing import Callable
+from fake_useragent import UserAgent
+
+
+ua = UserAgent()
 
 
 def scrape_loop():
@@ -27,13 +31,18 @@ class Revolver:
         self.current_proxy = next(self.proxies)
 
     def rotate_proxy(self):
-        print("rotating")
         self.current_proxy = next(self.proxies)
 
-    def make_request(self, method: str, *args, **kwargs):
+    def make_request(self, method: str, *args, use_fake_ua=False, **kwargs):
         for rotation in range(self.max_rotates):
             kwargs["proxies"] = {"http": self.current_proxy.address,
                                  "https": self.current_proxy.address}
+
+            if use_fake_ua:
+                if "headers" not in kwargs:
+                    kwargs["headers"] = {}
+
+                kwargs["headers"]["User-Agent"] = ua.random
 
             try:
                 response = request(method, *args, **kwargs)
