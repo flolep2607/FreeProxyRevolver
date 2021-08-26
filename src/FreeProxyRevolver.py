@@ -10,7 +10,7 @@ ua = UserAgent()
 def scrape_loop(*args, **kwargs):
     while True:
         pq = FreeProxyScraper.ProxyQuery()
-        for proxy in pq.find_proxies():
+        for proxy in pq.find_filter(*args, **kwargs):
             yield proxy
 
 
@@ -27,7 +27,6 @@ class Revolver:
         self.rotate_not_on_code = rotate_not_on_code
         self.rotate_on_code = rotate_on_code
         self.max_rotates = max_rotates
-        self.min_anon_level = min_anon_level
         self.proxies = scrape_loop(**kwargs)
         self.current_proxy = next(self.proxies)
 
