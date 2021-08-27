@@ -1,13 +1,15 @@
+import requests
 from requests import request
 import FreeProxyScraper
-from typing import Callable
+from FreeProxyScraper import Proxy
+from typing import Callable, Iterator, Union
 from fake_useragent import UserAgent
 
 
 ua = UserAgent()
 
 
-def scrape_loop(*args, **kwargs):
+def scrape_loop(*args, **kwargs) -> Iterator[Proxy]:
     while True:
         pq = FreeProxyScraper.ProxyQuery()
         for proxy in pq.find_filter(*args, **kwargs):
@@ -15,7 +17,7 @@ def scrape_loop(*args, **kwargs):
 
 
 class Revolver:
-    def __init__(self, rotate_on_code=None, rotate_not_on_code=None, max_rotates=6, **kwargs):
+    def __init__(self, rotate_on_code: list =None, rotate_not_on_code: list =None, max_rotates: int=6, **kwargs):
         assert max_rotates >= 0, "Rotations must be 0 or a positive integer"
 
         if rotate_not_on_code is None:
@@ -33,7 +35,7 @@ class Revolver:
     def rotate_proxy(self):
         self.current_proxy = next(self.proxies)
 
-    def make_request(self, method: str, *args, use_fake_ua=False, **kwargs):
+    def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
         for rotation in range(self.max_rotates):
             kwargs["proxies"] = {"http": self.current_proxy.address,
                                  "https": self.current_proxy.address}
@@ -47,6 +49,7 @@ class Revolver:
             try:
                 response = request(method, *args, **kwargs)
             except Exception:
+                response = None
                 self.rotate_proxy()
                 continue
 
@@ -61,23 +64,23 @@ class Revolver:
             return response
         return response
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> Union[None, requests.Response]:
         return self.make_request("get", *args, **kwargs)
 
-    def head(self, *args, **kwargs):
+    def head(self, *args, **kwargs) -> Union[None, requests.Response]:
         return self.make_request("head", *args, **kwargs)
 
-    def post(self, *args, **kwargs):
+    def post(self, *args, **kwargs) -> Union[None, requests.Response]:
         return self.make_request("post", *args, **kwargs)
 
-    def patch(self, *args, **kwargs):
+    def patch(self, *args, **kwargs) -> Union[None, requests.Response]:
         return self.make_request("patch", *args, **kwargs)
 
-    def put(self, *args, **kwargs):
+    def put(self, *args, **kwargs) -> Union[None, requests.Response]:
         return self.make_request("put", *args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, **kwargs) -> Union[None, requests.Response]:
         return self.make_request("delete", *args, **kwargs)
 
-    def options(self, *args, **kwargs):
+    def options(self, *args, **kwargs) -> Union[None, requests.Response]:
         return self.make_request("options", *args, **kwargs)
