@@ -38,7 +38,7 @@ class Revolver:
         self.current_proxy = next(self.proxies)
     def checker(self,address):
         try:
-            if not address in self.working and not proxy.address in self.broken:
+            if address not in self.working and proxy.address not in self.broken:
                 print("test:",address)
                 rep=requests.get("https://httpbin.org/status/200",headers={"proxies":{"http": address,"https": address}},timeout=5)
                 print("saint test")
