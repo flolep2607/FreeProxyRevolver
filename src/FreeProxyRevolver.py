@@ -82,12 +82,12 @@ class Revolver:
                 continue
 
             if response.status_code in self.rotate_on_code:
-                print("bruu")
+                print("bruu",response.status_code)
                 self.rotate_proxy()
                 continue
 
             if len(self.rotate_not_on_code) > 0 and response.status_code not in self.rotate_not_on_code:
-                print("bl")
+                print("bl",response.status_code)
                 self.rotate_proxy()
                 continue
             return response
