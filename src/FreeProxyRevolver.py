@@ -29,6 +29,7 @@ class Revolver:
         self.proxies = self.loop()
         self.working=[]
         t=threading.Thread(target=self.scrape_loop)
+        t.start()
         self.current_proxy = next(self.proxies)
     def loop(self):
         while True:
@@ -43,6 +44,7 @@ class Revolver:
             for proxy in pq.find_filter(*args, **kwargs):
                 print("new prox")
                 try:
+                    print("test:",proxy.address)
                     rep=requests.get("https://httpbin.org/get",headers={"proxies":{"http": proxy.address,"https": proxy.address}},timeout=4)
                     if rep.status_code==200:
                         if not proxy.address in self.working:self.working.append(proxy.address)
