@@ -45,7 +45,7 @@ class Revolver:
                 print("new prox")
                 try:
                     print("test:",proxy.address)
-                    rep=requests.get("https://httpbin.org/get",headers={"proxies":{"http": proxy.address,"https": proxy.address}},timeout=4)
+                    rep=requests.get("https://httpbin.org/status/200",headers={"proxies":{"http": proxy.address,"https": proxy.address}},timeout=4)
                     if rep.status_code==200:
                         if not proxy.address in self.working:self.working.append(proxy.address)
                 except:pass
