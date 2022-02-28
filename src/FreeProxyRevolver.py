@@ -28,7 +28,7 @@ class Revolver:
         #self.proxies = scrape_loop(**kwargs)
         self.proxies = self.loop()
         self.working=[]
-        t=threading.Thread(target=self.scrape_loop,args=args,kwargs=kwargs)
+        t=threading.Thread(target=self.scrape_loop)
         self.current_proxy = next(self.proxies)
     def loop(self):
         while True:
