@@ -41,7 +41,7 @@ class Revolver:
     def checker(self,address):
         try:
             if address not in self.working and address not in self.broken:
-                print("test:",address)
+                print("test:",address,len(self.working))
                 rep=requests.get("https://httpbin.org/status/200",proxies={"http": address,"https": address},timeout=5)
                 print("saint test")
                 if rep.status_code==200:
