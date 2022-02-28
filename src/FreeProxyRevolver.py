@@ -48,6 +48,7 @@ class Revolver:
                 response = request(method, *args, **kwargs)
             except Exception as e:
                 print(e)
+                print(self.current_proxy)
                 response = None
                 self.rotate_proxy()
                 continue
