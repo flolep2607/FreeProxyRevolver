@@ -13,6 +13,7 @@ def scrape_loop(*args, **kwargs) -> Iterator[Proxy]:
     while True:
         pq = FreeProxyScraper.ProxyQuery()
         for proxy in pq.find_filter(*args, **kwargs):
+            print("new prox")
             yield proxy
 
 
