@@ -52,12 +52,12 @@ class Revolver:
             for proxy in pq.find_filter(*args, **kwargs):
                 if not proxy:break
                 print("new prox")
-                checker(proxy.address)
+                self.checker(proxy.address)
         while True:
             proxies = FreeProxy()
             address=proxy.get()
             while address:
-                checker(address)
+                self.checker(address)
                 address=proxy.get()
                 
     def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
