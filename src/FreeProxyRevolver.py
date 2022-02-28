@@ -41,20 +41,20 @@ class Revolver:
     def checker(self,address):
         try:
             if address not in self.working and address not in self.broken:
-                print("test:",address,len(self.working))
+                #print("test:",address,len(self.working))
                 rep=requests.get("https://httpbin.org/status/200",proxies={"http": address,"https": address},timeout=5)
-                print("saint test")
+                #print("saint test")
                 if rep.status_code==200:
                     self.working.append(address)
         except Exception as e:
-            print(">>",e)
+            #print(">>",e)
             self.broken.append(address)
     def gen1(self):
         while True:
             pq = FreeProxyScraper.ProxyQuery()
             for proxy in pq.find_filter():
                 if not proxy:break
-                print("new prox",proxy.address)
+                #print("new prox",proxy.address)
                 self.checker(proxy.address)
     def gen2(self):
         while True:
