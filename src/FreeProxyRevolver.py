@@ -26,8 +26,10 @@ class Revolver:
         self.proxies = self.loop()
         self.working=[]
         self.broken=[]
-        t=threading.Thread(target=self.scrape_loop)
+        t=threading.Thread(target=self.gen1)
         t.start()
+        p=threading.Thread(target=self.gen2)
+        p.start()
         self.current_proxy = next(self.proxies)
     def loop(self):
         while True:
@@ -47,13 +49,14 @@ class Revolver:
         except Exception as e:
             print(">>",e)
             self.broken.append(address)
-    def scrape_loop(self,*args, **kwargs) -> Iterator[Proxy]:
+    def gen1(self):
         while True:
             pq = FreeProxyScraper.ProxyQuery()
             for proxy in pq.find_filter(*args, **kwargs):
                 if not proxy:break
                 print("new prox",proxy.address)
                 self.checker(proxy.address)
+    def gen2(self):
         while True:
             proxies = FreeProxy()
             address=proxy.get()
