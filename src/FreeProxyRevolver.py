@@ -7,6 +7,7 @@ from fake_useragent import UserAgent
 import threading
 import time
 from fp.fp import FreeProxy
+import json
 ua = UserAgent()
 
 class Revolver:
@@ -18,19 +19,26 @@ class Revolver:
 
         if rotate_on_code is None:
             rotate_on_code = [429, 403]
-
+        self.file_name="proxy.json"
         self.rotate_not_on_code = rotate_not_on_code
         self.rotate_on_code = rotate_on_code
         self.max_rotates = max_rotates
         #self.proxies = scrape_loop(**kwargs)
         self.proxies = self.loop()
         self.working=[]
+        self.read()
         self.broken=[]
         t=threading.Thread(target=self.gen1)
         t.start()
         p=threading.Thread(target=self.gen2)
         p.start()
         self.current_proxy = next(self.proxies)
+    def save(self):
+        with open(self.file_name, 'w') as outfile:
+            json.dump(self.working, outfile)
+    def read(self):
+        with open(self.file_name) as json_file:
+            self.working = json.load(json_file)
     def loop(self):
         while True:
             for p in self.working:
@@ -47,10 +55,13 @@ class Revolver:
                 if rep.status_code==200:
                     rep=requests.get("http://api.jeuxvideo.com/forums/42-51-69077786-1-0-1-0-m6-enquete-exclusive-invasion-de-l-ukraine-poutine-declare-la-guerre-au-monde.htm",proxies={"http": address,"https": address},timeout=5) 
                     if rep.status_code==200:
-                        self.working.append(address)
+                        self.working.append({"address":address,"fail":0})
+                        self.save()
         except Exception as e:
             #print(">>",e)
             self.broken.append(address)
+            if len(self.broken)>1000:
+                self.broken.pop(0)
     def gen1(self):
         while True:
             pq = FreeProxyScraper.ProxyQuery()
@@ -68,30 +79,38 @@ class Revolver:
                 
     def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
         for rotation in range(self.max_rotates):
-            kwargs["proxies"] = {"http": self.current_proxy,"https": self.current_proxy}
+            if self.current_proxy["fail"]>10:
+                self.working.remove(self.current_proxy)
+                self.save()
+                self.rotate_proxy()
+                continue
+            kwargs["proxies"] = {"http": self.current_proxy["address"],"https": self.current_proxy["address"]}
             if use_fake_ua:
                 if "headers" not in kwargs:
                     kwargs["headers"] = {}
                 kwargs["headers"]["User-Agent"] = ua.random
-
             try:
                 response = request(method, *args, **kwargs)
             except Exception as e:
+                self.current_proxy["fail"]+=1
                 print(e)
                 print(self.current_proxy)
                 response = None
                 self.rotate_proxy()
                 continue
-
+            
             if response.status_code in self.rotate_on_code:
+                self.current_proxy["fail"]+=1
                 print("bruu",response.status_code)
                 self.rotate_proxy()
                 continue
 
             if len(self.rotate_not_on_code) > 0 and response.status_code not in self.rotate_not_on_code:
+                self.current_proxy["fail"]+=1
                 print("bl",response.status_code)
                 self.rotate_proxy()
                 continue
+            self.current_proxy["fail"]=0
             return response
         return response
 
