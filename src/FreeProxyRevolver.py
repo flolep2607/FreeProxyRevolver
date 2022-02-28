@@ -41,8 +41,8 @@ class Revolver:
             self.working = json.load(json_file)
     def loop(self):
         while True:
-            for p in self.working:
-                yield p
+            while len(self.working)>0:
+                yield self.working.pop(0)
             time.sleep(0.2)
     def rotate_proxy(self):
         self.current_proxy = next(self.proxies)
@@ -80,7 +80,6 @@ class Revolver:
     def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
         for rotation in range(self.max_rotates):
             if self.current_proxy["fail"]>10:
-                self.working.remove(self.current_proxy)
                 self.save()
                 self.rotate_proxy()
                 continue
@@ -96,21 +95,25 @@ class Revolver:
                 print(e)
                 print(self.current_proxy)
                 response = None
+                self.working.append(self.current_proxy)
                 self.rotate_proxy()
                 continue
             
             if response.status_code in self.rotate_on_code:
                 self.current_proxy["fail"]+=1
                 print("bruu",response.status_code)
+                self.working.append(self.current_proxy)
                 self.rotate_proxy()
                 continue
 
             if len(self.rotate_not_on_code) > 0 and response.status_code not in self.rotate_not_on_code:
                 self.current_proxy["fail"]+=1
                 print("bl",response.status_code)
+                self.working.append(self.current_proxy)
                 self.rotate_proxy()
                 continue
             self.current_proxy["fail"]=0
+            self.working.append(self.current_proxy)
             return response
         return response
 
