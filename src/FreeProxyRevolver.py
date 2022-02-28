@@ -37,18 +37,16 @@ class Revolver:
 
     def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
         for rotation in range(self.max_rotates):
-            kwargs["proxies"] = {"http": self.current_proxy.address,
-                                 "https": self.current_proxy.address}
-
+            kwargs["proxies"] = {"http": self.current_proxy.address,"https": self.current_proxy.address}
             if use_fake_ua:
                 if "headers" not in kwargs:
                     kwargs["headers"] = {}
-
                 kwargs["headers"]["User-Agent"] = ua.random
 
             try:
                 response = request(method, *args, **kwargs)
-            except Exception:
+            except Exception as e:
+                print(e)
                 response = None
                 self.rotate_proxy()
                 continue
