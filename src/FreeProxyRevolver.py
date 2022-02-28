@@ -40,7 +40,7 @@ class Revolver:
         try:
             if address not in self.working and address not in self.broken:
                 print("test:",address)
-                rep=requests.get("https://httpbin.org/status/200",headers={"proxies":{"http": address,"https": address}},timeout=5)
+                rep=requests.get("https://httpbin.org/status/200",proxies={"http": address,"https": address}},timeout=5)
                 print("saint test")
                 if rep.status_code==200:
                     self.working.append(address)
