@@ -24,6 +24,7 @@ class Revolver:
         #self.proxies = scrape_loop(**kwargs)
         self.proxies = self.loop()
         self.working=[]
+        self.broken=[]
         t=threading.Thread(target=self.scrape_loop)
         t.start()
         self.current_proxy = next(self.proxies)
@@ -40,12 +41,14 @@ class Revolver:
             for proxy in pq.find_filter(*args, **kwargs):
                 print("new prox")
                 try:
-                    print("test:",proxy.address)
-                    rep=requests.get("https://httpbin.org/status/200",headers={"proxies":{"http": proxy.address,"https": proxy.address}},timeout=4)
-                    print("saint test")
-                    if rep.status_code==200:
-                        if not proxy.address in self.working:self.working.append(proxy.address)
-                except:pass
+                    if not proxy.address in self.working and not proxy.address in self.broken:
+                        print("test:",proxy.address)
+                        rep=requests.get("https://httpbin.org/status/200",headers={"proxies":{"http": proxy.address,"https": proxy.address}},timeout=5)
+                        print("saint test")
+                        if rep.status_code==200:
+                            self.working.append(proxy.address)
+                except:
+                    self.broken.append(proxy.address)
     def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
         for rotation in range(self.max_rotates):
             kwargs["proxies"] = {"http": self.current_proxy,"https": self.current_proxy}
