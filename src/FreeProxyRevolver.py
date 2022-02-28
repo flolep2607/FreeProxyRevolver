@@ -4,21 +4,12 @@ import FreeProxyScraper
 from FreeProxyScraper import Proxy
 from typing import Callable, Iterator, Union
 from fake_useragent import UserAgent
-
-
+import threading
+import time
 ua = UserAgent()
 
 
-def scrape_loop(*args, **kwargs) -> Iterator[Proxy]:
-    while True:
-        pq = FreeProxyScraper.ProxyQuery()
-        try:
-            for proxy in pq.find_filter(*args, **kwargs):
-                print("new prox")
-                yield proxy
-        except:
-            for i in self.working:
-                yield {"address":i}
+
 
 
 class Revolver:
@@ -34,16 +25,31 @@ class Revolver:
         self.rotate_not_on_code = rotate_not_on_code
         self.rotate_on_code = rotate_on_code
         self.max_rotates = max_rotates
-        self.proxies = scrape_loop(**kwargs)
-        self.current_proxy = next(self.proxies)
+        #self.proxies = scrape_loop(**kwargs)
+        self.proxies = self.loop()
         self.working=[]
-
+        t=threading.Thread(target=self.scrape_loop,args=args,kwargs=kwargs)
+        self.current_proxy = next(self.proxies)
+    def loop(self):
+        while True:
+            for p in self.working:
+                yield p
+            time.sleep(0.2)
     def rotate_proxy(self):
         self.current_proxy = next(self.proxies)
-
+    def scrape_loop(self,*args, **kwargs) -> Iterator[Proxy]:
+        while True:
+            pq = FreeProxyScraper.ProxyQuery()
+            for proxy in pq.find_filter(*args, **kwargs):
+                print("new prox")
+                try:
+                    rep=requests.get("https://httpbin.org/get",headers={"proxies":{"http": proxy.address,"https": proxy.address}},timeout=4)
+                    if rep.status_code==200:
+                        if not proxy.address in self.working:self.working.append(proxy.address)
+                except:pass
     def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
         for rotation in range(self.max_rotates):
-            kwargs["proxies"] = {"http": self.current_proxy.address,"https": self.current_proxy.address}
+            kwargs["proxies"] = {"http": self.current_proxy,"https": self.current_proxy}
             if use_fake_ua:
                 if "headers" not in kwargs:
                     kwargs["headers"] = {}
@@ -91,3 +97,4 @@ class Revolver:
 
     def options(self, *args, **kwargs) -> Union[None, requests.Response]:
         return self.make_request("options", *args, **kwargs)
+
