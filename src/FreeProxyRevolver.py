@@ -8,10 +8,6 @@ import threading
 import time
 ua = UserAgent()
 
-
-
-
-
 class Revolver:
     def __init__(self, rotate_on_code: list =None, rotate_not_on_code: list =None, max_rotates: int=6, **kwargs):
         assert max_rotates >= 0, "Rotations must be 0 or a positive integer"
@@ -46,6 +42,7 @@ class Revolver:
                 try:
                     print("test:",proxy.address)
                     rep=requests.get("https://httpbin.org/status/200",headers={"proxies":{"http": proxy.address,"https": proxy.address}},timeout=4)
+                    print("saint test")
                     if rep.status_code==200:
                         if not proxy.address in self.working:self.working.append(proxy.address)
                 except:pass
