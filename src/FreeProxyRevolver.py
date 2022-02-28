@@ -90,7 +90,6 @@ class Revolver:
                 print("bl")
                 self.rotate_proxy()
                 continue
-            if self.current_proxy.address not in self.working:self.working.append(self.current_proxy.address)
             return response
         return response
 
