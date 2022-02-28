@@ -45,7 +45,9 @@ class Revolver:
                 rep=requests.get("http://httpbin.org/status/200",proxies={"http": address,"https": address},timeout=5)
                 #print("saint test")
                 if rep.status_code==200:
-                    self.working.append(address)
+                    rep=requests.get("http://api.jeuxvideo.com/forums/42-51-69077786-1-0-1-0-m6-enquete-exclusive-invasion-de-l-ukraine-poutine-declare-la-guerre-au-monde.htm",proxies={"http": address,"https": address},timeout=5) 
+                    if rep.status_code==200:
+                        self.working.append(address)
         except Exception as e:
             #print(">>",e)
             self.broken.append(address)
