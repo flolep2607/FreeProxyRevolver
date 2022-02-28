@@ -8,6 +8,7 @@ import threading
 import time
 from fp.fp import FreeProxy
 import json
+from os import path
 ua = UserAgent()
 
 class Revolver:
@@ -37,8 +38,9 @@ class Revolver:
         with open(self.file_name, 'w') as outfile:
             json.dump(self.working, outfile)
     def read(self):
-        with open(self.file_name) as json_file:
-            self.working = json.load(json_file)
+        if path.exists(self.file_name):
+            with open(self.file_name) as json_file:
+                self.working = json.load(json_file)
     def loop(self):
         while True:
             while len(self.working)>0:
