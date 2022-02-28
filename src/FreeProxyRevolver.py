@@ -6,6 +6,7 @@ from typing import Callable, Iterator, Union
 from fake_useragent import UserAgent
 import threading
 import time
+from fp.fp import FreeProxy
 ua = UserAgent()
 
 class Revolver:
@@ -35,20 +36,30 @@ class Revolver:
             time.sleep(0.2)
     def rotate_proxy(self):
         self.current_proxy = next(self.proxies)
+    def checker(self,address):
+        try:
+            if not address in self.working and not proxy.address in self.broken:
+                print("test:",address)
+                rep=requests.get("https://httpbin.org/status/200",headers={"proxies":{"http": address,"https": address}},timeout=5)
+                print("saint test")
+                if rep.status_code==200:
+                    self.working.append(address)
+        except:
+            self.broken.append(address)
     def scrape_loop(self,*args, **kwargs) -> Iterator[Proxy]:
         while True:
             pq = FreeProxyScraper.ProxyQuery()
             for proxy in pq.find_filter(*args, **kwargs):
+                if not proxy:break
                 print("new prox")
-                try:
-                    if not proxy.address in self.working and not proxy.address in self.broken:
-                        print("test:",proxy.address)
-                        rep=requests.get("https://httpbin.org/status/200",headers={"proxies":{"http": proxy.address,"https": proxy.address}},timeout=5)
-                        print("saint test")
-                        if rep.status_code==200:
-                            self.working.append(proxy.address)
-                except:
-                    self.broken.append(proxy.address)
+                checker(proxy.address)
+        while True:
+            proxies = FreeProxy()
+            address=proxy.get()
+            while address:
+                checker(address)
+                address=proxy.get()
+                
     def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
         for rotation in range(self.max_rotates):
             kwargs["proxies"] = {"http": self.current_proxy,"https": self.current_proxy}
