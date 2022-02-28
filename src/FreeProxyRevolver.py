@@ -52,7 +52,7 @@ class Revolver:
     def gen1(self):
         while True:
             pq = FreeProxyScraper.ProxyQuery()
-            for proxy in pq.find_filter(*args, **kwargs):
+            for proxy in pq.find_filter():
                 if not proxy:break
                 print("new prox",proxy.address)
                 self.checker(proxy.address)
