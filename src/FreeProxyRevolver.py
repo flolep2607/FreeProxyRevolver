@@ -59,10 +59,10 @@ class Revolver:
     def gen2(self):
         while True:
             proxies = FreeProxy()
-            address=proxy.get()
+            address=proxies.get()
             while address:
                 self.checker(address)
-                address=proxy.get()
+                address=proxies.get()
                 
     def make_request(self, method: str, *args, use_fake_ua: bool =False, **kwargs) -> Union[None, requests.Response]:
         for rotation in range(self.max_rotates):
