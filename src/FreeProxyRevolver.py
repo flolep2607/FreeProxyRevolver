@@ -44,14 +44,15 @@ class Revolver:
                 print("saint test")
                 if rep.status_code==200:
                     self.working.append(address)
-        except:
+        except Exception as e:
+            print(">>",e)
             self.broken.append(address)
     def scrape_loop(self,*args, **kwargs) -> Iterator[Proxy]:
         while True:
             pq = FreeProxyScraper.ProxyQuery()
             for proxy in pq.find_filter(*args, **kwargs):
                 if not proxy:break
-                print("new prox")
+                print("new prox",proxy.address)
                 self.checker(proxy.address)
         while True:
             proxies = FreeProxy()
